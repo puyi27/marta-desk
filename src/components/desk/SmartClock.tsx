@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import NumberFlow from "@number-flow/react";
 import { Cloud, Sun, Sunset, Moon } from "lucide-react";
 import { useDeskStore } from "@/store/useDeskStore";
+import { useAudioStore } from "@/store/useAudioStore";
 
 type ThemeMode = "auto" | "day" | "sunset" | "night";
 
@@ -14,22 +15,19 @@ const themeIcons: Record<ThemeMode, React.ReactNode> = {
   night: <Moon size={14} className="text-indigo-300" />,
 };
 
-const themeModes: ThemeMode[] = ["auto", "day", "sunset", "night"];
+const themeModes: ThemeMode[] = ["day", "sunset", "night", "auto"];
 
 export default function SmartClock() {
-  const [time, setTime] = useState("");
+  const [hours, setHours] = useState(12);
+  const [minutes, setMinutes] = useState(0);
   const { weatherData, themeMode, setThemeMode } = useDeskStore();
+  const { playHoverTick } = useAudioStore();
 
   useEffect(() => {
     const updateTime = () => {
       const now = new Date();
-      setTime(
-        now.toLocaleTimeString("es-ES", {
-          hour: "2-digit",
-          minute: "2-digit",
-          hour12: false,
-        })
-      );
+      setHours(now.getHours());
+      setMinutes(now.getMinutes());
     };
     updateTime();
     const interval = setInterval(updateTime, 1000);
@@ -38,71 +36,52 @@ export default function SmartClock() {
 
   const handleNextTheme = (e: React.MouseEvent) => {
     e.stopPropagation();
+    playHoverTick();
     const nextIdx = (themeModes.indexOf(themeMode) + 1) % themeModes.length;
     setThemeMode(themeModes[nextIdx]);
   };
 
+  const tempValue = weatherData ? weatherData.temp : 6;
+  const conditionText = weatherData ? weatherData.condition : "despejado";
+
   return (
-    <motion.div
-      whileHover={{ y: -4, scale: 1.03 }}
-      whileTap={{ scale: 0.98 }}
-      transition={{ type: "spring", stiffness: 400, damping: 25 }}
+    <div
       onClick={handleNextTheme}
-      className="absolute cursor-pointer select-none group"
-      style={{
-        left: "44.5%",
-        top: "43%",
-        width: "185px",
-        height: "82px",
-        zIndex: 25,
-      }}
-      title="Reloj inteligente - Clic para cambiar atmósfera"
+      onMouseEnter={playHoverTick}
+      className="absolute top-[44%] left-[45.5%] w-[15.5%] h-[13%] cursor-pointer group rounded-2xl transition-all duration-300 flex flex-col justify-center items-center select-none"
+      style={{ zIndex: 14 }}
+      title="Reloj inteligente - Clic para alternar ambiente"
     >
-      <div className="relative w-full h-full">
-        <div className="absolute -bottom-3 left-3 right-3 h-4 bg-black/45 rounded-full blur-md" />
+      <div className="absolute inset-0 rounded-2xl bg-[radial-gradient(circle,rgba(255,255,255,0.18)_0%,transparent_70%)] opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
 
-        <div
-          className="relative w-full h-full rounded-2xl flex flex-col justify-between p-2.5 shadow-2xl transition-all duration-300 group-hover:ring-2 group-hover:ring-sky-400/40"
-          style={{
-            background: "linear-gradient(180deg, #1f232d 0%, #12141a 70%, #0a0b0e 100%)",
-            border: "2px solid rgba(255, 255, 255, 0.15)",
-            boxShadow: "0 15px 25px -5px rgba(0,0,0,0.6), inset 0 1px 2px rgba(255,255,255,0.25), inset 0 -2px 4px rgba(0,0,0,0.5)",
-          }}
-        >
-          <div className="flex items-center justify-between w-full px-1">
-            <span
-              className="text-[10px] uppercase font-bold tracking-wider text-sky-400/80"
-              style={{ fontFamily: "var(--font-mono)" }}
-            >
-              Sevilla
-            </span>
-            <button
-              onClick={handleNextTheme}
-              className="p-1 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
-            >
-              {themeIcons[themeMode]}
-            </button>
-          </div>
-
-          <div className="flex items-center justify-center -my-1">
-            <span
-              className="text-white font-bold tracking-wider drop-shadow-[0_0_12px_rgba(255,255,255,0.8)]"
-              style={{
-                fontFamily: "var(--font-mono)",
-                fontSize: "1.9rem",
-                letterSpacing: "0.06em",
-              }}
-            >
-              {time || "12:00"}
-            </span>
-          </div>
-
-          <div className="flex items-center justify-between px-1 text-[10px] text-neutral-300 font-mono">
-            <span>{weatherData ? `${weatherData.temp}°C, ${weatherData.condition}` : "18°C, despejado"}</span>
-            <span className="text-[9px] text-neutral-400 capitalize">{themeMode}</span>
-          </div>
+      <div className="absolute -top-7 left-1/2 -translate-x-1/2 pointer-events-none opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:scale-105">
+        <div className="backdrop-blur-md bg-white/90 text-zinc-900 px-3 py-1 rounded-full text-xs font-semibold shadow-xl border border-white/50 flex items-center gap-1.5 whitespace-nowrap">
+          <span>{tempValue}°C</span>
+          <span className="text-[10px] text-zinc-600 capitalize">
+            {conditionText}
+          </span>
         </div>
       </div>
-    </motion.div>
+
+      <div
+        className="text-white text-4xl font-bold tracking-tight drop-shadow-lg flex items-center"
+        style={{ fontFamily: "var(--font-mono)" }}
+      >
+        <NumberFlow value={hours} format={{ minimumIntegerDigits: 2 }} />
+        <span className="mx-0.5 animate-pulse text-neutral-300">:</span>
+        <NumberFlow value={minutes} format={{ minimumIntegerDigits: 2 }} />
+      </div>
+
+      <div className="flex items-center gap-2 text-xs text-neutral-200 font-mono mt-1 drop-shadow-sm">
+        {themeIcons[themeMode]}
+        <div className="flex items-center">
+          <NumberFlow value={tempValue} />
+          <span>°C</span>
+        </div>
+        <span className="text-[10px] text-neutral-300 capitalize hidden sm:inline">
+          {conditionText}
+        </span>
+      </div>
+    </div>
   );
 }

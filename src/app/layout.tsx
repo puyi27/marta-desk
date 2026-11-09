@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Playfair_Display, JetBrains_Mono } from "next/font/google";
+import { Toaster } from "sonner";
 import "./globals.css";
 
 const inter = Inter({
@@ -10,7 +11,6 @@ const inter = Inter({
 const playfair = Playfair_Display({
   variable: "--font-playfair",
   subsets: ["latin"],
-  style: ["normal", "italic"],
 });
 
 const jetbrainsMono = JetBrains_Mono({
@@ -19,8 +19,9 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Tu Rincón",
-  description: "Un escritorio hecho con amor para ti",
+  title: "El Rincón de Marta | Lofi Desk",
+  description:
+    "Un espacio de estudio interactivo, cálido y personal para Marta, con música de los 80, Ortega y Gasset y recuerdos especiales.",
 };
 
 export default function RootLayout({
@@ -29,11 +30,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es">
+    <html lang="es" className="dark">
       <body
         className={`${inter.variable} ${playfair.variable} ${jetbrainsMono.variable} antialiased`}
       >
         {children}
+        <Toaster position="bottom-right" richColors theme="dark" />
       </body>
     </html>
   );

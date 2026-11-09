@@ -1,120 +1,136 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { useState } from "react";
 import Image from "next/image";
-import { corkboardPhotos } from "@/data/deskData";
+import {
+  DndContext,
+  useDraggable,
+  useSensor,
+  useSensors,
+  PointerSensor,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import { corkboardPhotos, CorkboardPhoto } from "@/data/deskData";
 import { useDeskStore } from "@/store/useDeskStore";
+import { useAudioStore } from "@/store/useAudioStore";
+import DeskHotspot from "@/components/desk/DeskHotspot";
 
-const pinColors: Record<string, string> = {
-  "photo-primos": "linear-gradient(135deg, #ef4444 0%, #b91c1c 100%)",
-  "photo-dora": "linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)",
-  "photo-cristo": "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)",
-};
+interface DraggablePolaroidProps {
+  photo: CorkboardPhoto;
+  initialX: number;
+  initialY: number;
+  onOpen: (id: string) => void;
+}
+
+function DraggablePolaroid({
+  photo,
+  initialX,
+  initialY,
+  onOpen,
+}: DraggablePolaroidProps) {
+  const { attributes, listeners, setNodeRef, transform, isDragging } =
+    useDraggable({
+      id: photo.id,
+    });
+
+  const x = initialX + (transform?.x ?? 0);
+  const y = initialY + (transform?.y ?? 0);
+
+  return (
+    <div
+      ref={setNodeRef}
+      {...listeners}
+      {...attributes}
+      onClick={(e) => {
+        e.stopPropagation();
+        onOpen(photo.id);
+      }}
+      style={{
+        transform: `translate3d(${x}px, ${y}px, 0) rotate(${
+          isDragging ? 0 : photo.rotation
+        }deg) scale(${isDragging ? 1.08 : 1})`,
+        zIndex: isDragging ? 50 : 10,
+        touchAction: "none",
+      }}
+      className="absolute top-0 left-0 w-[46%] bg-white p-1 pb-3 rounded-xs shadow-md hover:shadow-xl transition-shadow cursor-grab active:cursor-grabbing select-none"
+    >
+      <div className="relative w-full aspect-square rounded-2xs overflow-hidden bg-neutral-100 pointer-events-none">
+        <Image
+          src={photo.imageSrc}
+          alt={photo.title}
+          fill
+          sizes="120px"
+          className="object-cover"
+        />
+      </div>
+      <p
+        className="text-center text-[8.5px] text-neutral-700 font-medium mt-1 truncate pointer-events-none px-0.5"
+        style={{ fontFamily: "var(--font-mono)" }}
+      >
+        {photo.title}
+      </p>
+    </div>
+  );
+}
 
 export default function Corkboard() {
   const { setActiveModal, setSelectedPhotoId } = useDeskStore();
+  const { playBookOpen } = useAudioStore();
+
+  const [positions, setPositions] = useState<Record<string, { x: number; y: number }>>({
+    "photo-dora": { x: 8, y: 15 },
+    "photo-primos": { x: 95, y: 12 },
+    "photo-cristo": { x: 50, y: 130 },
+  });
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 5,
+      },
+    })
+  );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, delta } = event;
+    const id = String(active.id);
+    setPositions((prev) => ({
+      ...prev,
+      [id]: {
+        x: (prev[id]?.x ?? 0) + delta.x,
+        y: (prev[id]?.y ?? 0) + delta.y,
+      },
+    }));
+  };
 
   const handleOpenPhoto = (id: string) => {
+    playBookOpen();
     setSelectedPhotoId(id);
     setActiveModal("corkboard");
   };
 
   return (
-    <div
-      className="absolute select-none"
-      style={{
-        left: "3%",
-        top: "7%",
-        width: "240px",
-        height: "340px",
-        zIndex: 15,
-      }}
+    <DeskHotspot
+      label="Corcho de Recuerdos"
+      sublabel="3 fotos"
+      badgePosition="top-right"
+      className="top-[4%] left-[2%] w-[20%] h-[50%]"
+      style={{ zIndex: 15 }}
+      onClick={() => handleOpenPhoto(corkboardPhotos[0]?.id ?? "")}
     >
-      <div
-        className="relative w-full h-full rounded-2xl p-3 flex flex-col justify-between shadow-2xl transition-all"
-        style={{
-          background:
-            "radial-gradient(circle at 40% 40%, #c49658 0%, #a8793e 60%, #875c27 100%)",
-          border: "10px solid #4a2f18",
-          boxShadow:
-            "0 30px 60px -10px rgba(0,0,0,0.7), inset 0 3px 12px rgba(0,0,0,0.5), 0 0 0 2px #261609",
-        }}
-      >
-        <div className="flex justify-between items-start pt-1">
-          {corkboardPhotos.slice(0, 2).map((photo) => (
-            <motion.div
+      <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
+        <div className="relative w-full h-full p-2">
+          {corkboardPhotos.map((photo) => (
+            <DraggablePolaroid
               key={photo.id}
-              layoutId={`photo-${photo.id}`}
-              whileHover={{ scale: 1.14, rotate: 0, zIndex: 35 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => handleOpenPhoto(photo.id)}
-              className="relative cursor-pointer bg-white p-1.5 pb-3.5 rounded-sm shadow-xl transition-shadow group"
-              style={{
-                width: "96px",
-                transform: `rotate(${photo.rotation}deg)`,
-                boxShadow: "0 8px 18px rgba(0,0,0,0.35)",
-              }}
-            >
-              <div
-                className="absolute -top-2 left-1/2 -translate-x-1/2 w-3.5 h-3.5 rounded-full shadow-md z-10"
-                style={{ background: pinColors[photo.id] ?? "#ef4444" }}
-              />
-              <div className="relative w-full h-20 rounded-2xs overflow-hidden bg-neutral-200">
-                <Image
-                  src={photo.imageSrc}
-                  alt={photo.title}
-                  fill
-                  sizes="96px"
-                  className="object-cover"
-                />
-              </div>
-              <p
-                className="text-center text-[9px] text-neutral-700 font-medium mt-1 truncate"
-                style={{ fontFamily: "var(--font-mono)" }}
-              >
-                {photo.title}
-              </p>
-            </motion.div>
+              photo={photo}
+              initialX={positions[photo.id]?.x ?? 0}
+              initialY={positions[photo.id]?.y ?? 0}
+              onOpen={handleOpenPhoto}
+            />
           ))}
         </div>
-
-        {corkboardPhotos[2] && (
-          <div className="flex justify-center -mt-1">
-            <motion.div
-              layoutId={`photo-${corkboardPhotos[2].id}`}
-              whileHover={{ scale: 1.14, rotate: 0, zIndex: 35 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => handleOpenPhoto(corkboardPhotos[2].id)}
-              className="relative cursor-pointer bg-white p-1.5 pb-3.5 rounded-sm shadow-xl transition-shadow group"
-              style={{
-                width: "96px",
-                transform: `rotate(${corkboardPhotos[2].rotation}deg)`,
-                boxShadow: "0 8px 18px rgba(0,0,0,0.35)",
-              }}
-            >
-              <div
-                className="absolute -top-2 left-1/2 -translate-x-1/2 w-3.5 h-3.5 rounded-full shadow-md z-10"
-                style={{ background: pinColors[corkboardPhotos[2].id] ?? "#f59e0b" }}
-              />
-              <div className="relative w-full h-20 rounded-2xs overflow-hidden bg-neutral-200">
-                <Image
-                  src={corkboardPhotos[2].imageSrc}
-                  alt={corkboardPhotos[2].title}
-                  fill
-                  sizes="96px"
-                  className="object-cover"
-                />
-              </div>
-              <p
-                className="text-center text-[9px] text-neutral-700 font-medium mt-1 truncate"
-                style={{ fontFamily: "var(--font-mono)" }}
-              >
-                {corkboardPhotos[2].title}
-              </p>
-            </motion.div>
-          </div>
-        )}
-      </div>
-    </div>
+      </DndContext>
+    </DeskHotspot>
   );
 }

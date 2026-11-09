@@ -76,7 +76,7 @@ export const playlistTracks: PlaylistTrack[] = [
 export const corkboardPhotos: CorkboardPhoto[] = [
   {
     id: "photo-dora",
-    title: "Dora",
+    title: "Dora (siempre con nosotros)",
     imageSrc: "/images/corkboard/dora.jpg",
     backNote:
       "Dora, la compañera más fiel. Aunque ya no estés, sigues viviendo en cada rincón de tu corazón y en el nuestro. Te queremos siempre. 🐾",
