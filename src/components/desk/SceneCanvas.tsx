@@ -1,6 +1,5 @@
 "use client";
 
-import Tilt from "react-parallax-tilt";
 import { useDeskStore } from "@/store/useDeskStore";
 
 import WindowView from "@/components/desk/WindowView";
@@ -24,18 +23,10 @@ export default function SceneCanvas() {
     <div className="relative w-screen h-screen overflow-hidden select-none bg-black">
       <AmbientMixer />
 
-      <Tilt
-        tiltMaxAngleX={1.5}
-        tiltMaxAngleY={1.5}
-        perspective={1200}
-        scale={1.02}
-        transitionSpeed={2000}
-        tiltReverse={true}
-        className="relative w-full h-full"
-      >
+      <div className="relative w-full h-full">
         <div
           className="absolute inset-0 bg-cover bg-center transition-all duration-1000"
-          style={{ backgroundImage: "url('/images/desk-bg.jpg')" }}
+          style={{ backgroundImage: "url('/images/desk-room.jpg')" }}
         />
 
         <div
@@ -79,7 +70,7 @@ export default function SceneCanvas() {
         <PhilosophyBook />
         <DachshundPlush />
         <GamerDrawer />
-      </Tilt>
+      </div>
     </div>
   );
 }

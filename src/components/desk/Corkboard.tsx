@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import {
   DndContext,
@@ -76,12 +76,17 @@ function DraggablePolaroid({
 export default function Corkboard() {
   const { setActiveModal, setSelectedPhotoId } = useDeskStore();
   const { playBookOpen } = useAudioStore();
+  const [mounted, setMounted] = useState(false);
 
   const [positions, setPositions] = useState<Record<string, { x: number; y: number }>>({
     "photo-dora": { x: 8, y: 15 },
     "photo-primos": { x: 95, y: 12 },
     "photo-cristo": { x: 50, y: 130 },
   });
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -118,19 +123,52 @@ export default function Corkboard() {
       style={{ zIndex: 15 }}
       onClick={() => handleOpenPhoto(corkboardPhotos[0]?.id ?? "")}
     >
-      <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
+      {mounted ? (
+        <DndContext id="corkboard-dnd" sensors={sensors} onDragEnd={handleDragEnd}>
+          <div className="relative w-full h-full p-2">
+            {corkboardPhotos.map((photo) => (
+              <DraggablePolaroid
+                key={photo.id}
+                photo={photo}
+                initialX={positions[photo.id]?.x ?? 0}
+                initialY={positions[photo.id]?.y ?? 0}
+                onOpen={handleOpenPhoto}
+              />
+            ))}
+          </div>
+        </DndContext>
+      ) : (
         <div className="relative w-full h-full p-2">
-          {corkboardPhotos.map((photo) => (
-            <DraggablePolaroid
-              key={photo.id}
-              photo={photo}
-              initialX={positions[photo.id]?.x ?? 0}
-              initialY={positions[photo.id]?.y ?? 0}
-              onOpen={handleOpenPhoto}
-            />
-          ))}
+          {corkboardPhotos.map((photo) => {
+            const pos = positions[photo.id] ?? { x: 0, y: 0 };
+            return (
+              <div
+                key={photo.id}
+                style={{
+                  transform: `translate3d(${pos.x}px, ${pos.y}px, 0) rotate(${photo.rotation}deg)`,
+                }}
+                className="absolute top-0 left-0 w-[46%] bg-white p-1 pb-3 rounded-xs shadow-md select-none"
+              >
+                <div className="relative w-full aspect-square rounded-2xs overflow-hidden bg-neutral-100">
+                  <Image
+                    src={photo.imageSrc}
+                    alt={photo.title}
+                    fill
+                    sizes="120px"
+                    className="object-cover"
+                  />
+                </div>
+                <p
+                  className="text-center text-[8.5px] text-neutral-700 font-medium mt-1 truncate px-0.5"
+                  style={{ fontFamily: "var(--font-mono)" }}
+                >
+                  {photo.title}
+                </p>
+              </div>
+            );
+          })}
         </div>
-      </DndContext>
+      )}
     </DeskHotspot>
   );
 }

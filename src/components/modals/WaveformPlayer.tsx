@@ -50,3 +50,4 @@ export default function WaveformPlayer({ url }: WaveformPlayerProps) {
     </div>
   );
 }
+
