@@ -1,9 +1,26 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
-  cacheComponents: true,
-  partialPrefetching: true,
+  allowedDevOrigins: [
+    "26.113.24.209",
+    "26.113.24.209:3000",
+    "localhost",
+    "localhost:3000",
+    "127.0.0.1",
+    "127.0.0.1:3000",
+  ],
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "openweathermap.org",
+      },
+      {
+        protocol: "https",
+        hostname: "i.scdn.co",
+      },
+    ],
+  },
   turbopack: {
     rules: {
       "*.css": {
