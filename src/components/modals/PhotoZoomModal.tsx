@@ -26,8 +26,7 @@ export default function PhotoZoomModal() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 flex items-center justify-center modal-backdrop select-none"
-      style={{ background: "rgba(0,0,0,0.75)", zIndex: 50 }}
+      className="fixed inset-0 flex items-center justify-center backdrop-blur-2xl bg-black/65 z-50 select-none"
       onClick={(e) => {
         if (e.target === e.currentTarget) handleClose();
       }}

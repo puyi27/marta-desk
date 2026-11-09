@@ -103,8 +103,7 @@ export default function OrtegaAgentModal() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 flex items-center justify-center p-3 sm:p-6 backdrop-blur-md"
-      style={{ background: "rgba(15, 12, 10, 0.8)", zIndex: 60 }}
+      className="fixed inset-0 flex items-center justify-center p-3 sm:p-6 backdrop-blur-2xl bg-black/65 z-50 select-none"
       onClick={(e) => {
         if (e.target === e.currentTarget) setActiveModal(null);
       }}
@@ -113,10 +112,12 @@ export default function OrtegaAgentModal() {
         initial={{ scale: 0.95, opacity: 0, y: 15 }}
         animate={{ scale: 1, opacity: 1, y: 0 }}
         exit={{ scale: 0.95, opacity: 0, y: 15 }}
-        className="relative w-full max-w-5xl bg-[#FAF6F0] rounded-3xl shadow-2xl border-2 border-[#d6c4ae] overflow-hidden flex flex-col md:flex-row"
-        style={{ height: "min(720px, 94vh)" }}
+        transition={{ type: "spring", stiffness: 300, damping: 28 }}
+        className="w-full max-w-5xl aspect-[16/10] bg-[#FAF6EE] text-stone-900 rounded-2xl shadow-[0_25px_80px_rgba(0,0,0,0.75)] border border-stone-300 relative overflow-hidden grid grid-cols-1 md:grid-cols-2 max-h-[92vh]"
       >
-        <div className="w-full md:w-[42%] bg-[#F4EFE6] border-b md:border-b-0 md:border-r border-[#d6c4ae] p-6 flex flex-col justify-between overflow-y-auto">
+        <div className="bg-gradient-to-r from-transparent via-stone-900/15 to-transparent w-12 left-1/2 -translate-x-1/2 inset-y-0 absolute pointer-events-none hidden md:block z-10" />
+
+        <div className="p-6 md:p-8 flex flex-col justify-between overflow-y-auto border-b md:border-b-0 md:border-r border-stone-300/80 bg-[#F4EFE6]/70">
           <div>
             <div className="flex items-center gap-2 text-amber-900 mb-2">
               <BookOpen size={18} />
@@ -126,7 +127,7 @@ export default function OrtegaAgentModal() {
             </div>
 
             <h2
-              className="text-2xl font-bold text-stone-900 leading-snug"
+              className="text-2xl md:text-3xl font-bold text-stone-900 leading-snug"
               style={{ fontFamily: "var(--font-playfair)" }}
             >
               Estudios sobre el amor
@@ -146,7 +147,7 @@ export default function OrtegaAgentModal() {
                 {famousQuotes.map((q, idx) => (
                   <div
                     key={idx}
-                    className="p-2.5 rounded-xl bg-white/60 border border-amber-900/10 text-xs text-stone-800 leading-relaxed italic font-serif"
+                    className="p-2.5 rounded-xl bg-white/70 border border-amber-900/10 text-xs text-stone-800 leading-relaxed italic font-serif"
                   >
                     "{q}"
                   </div>
@@ -187,14 +188,14 @@ export default function OrtegaAgentModal() {
             </div>
           </div>
 
-          <div className="pt-4 border-t border-amber-900/10 text-[11px] text-stone-500 font-mono flex items-center justify-between">
+          <div className="pt-4 border-t border-stone-300/60 text-[11px] text-stone-500 font-mono flex items-center justify-between">
             <span>Para la mejor filósofa 💙</span>
             <span>Ángel & Marta</span>
           </div>
         </div>
 
-        <div className="flex-1 flex flex-col justify-between p-6 bg-[#FAF6F0] overflow-hidden">
-          <div className="flex items-center justify-between pb-3 border-b border-[#d6c4ae]">
+        <div className="p-6 md:p-8 flex flex-col justify-between overflow-hidden bg-[#FAF6EE]">
+          <div className="flex items-center justify-between pb-3 border-b border-stone-300/80">
             <div>
               <span className="text-xs font-mono text-amber-900/70 uppercase">
                 Diálogo Epistolar
@@ -215,7 +216,7 @@ export default function OrtegaAgentModal() {
             </button>
           </div>
 
-          <div className="flex flex-wrap gap-1.5 py-3">
+          <div className="flex flex-wrap gap-1.5 py-2.5">
             {quickPrompts.map((p, idx) => (
               <button
                 key={idx}
@@ -259,7 +260,7 @@ export default function OrtegaAgentModal() {
                     <div
                       className={`max-w-[88%] rounded-2xl p-4 shadow-sm relative group ${
                         isAssistant
-                          ? "bg-white text-stone-900 border border-[#e3d7c5]"
+                          ? "bg-white text-stone-900 border border-stone-200"
                           : "bg-amber-800 text-amber-50"
                       }`}
                     >
@@ -296,7 +297,7 @@ export default function OrtegaAgentModal() {
 
             {loading && (
               <div className="flex justify-start">
-                <div className="bg-white rounded-2xl p-4 border border-[#e3d7c5] flex items-center gap-2 text-xs text-amber-900/70 font-mono shadow-sm">
+                <div className="bg-white rounded-2xl p-4 border border-stone-200 flex items-center gap-2 text-xs text-amber-900/70 font-mono shadow-sm">
                   <div className="w-2 h-2 rounded-full bg-amber-600 animate-bounce" />
                   <div
                     className="w-2 h-2 rounded-full bg-amber-600 animate-bounce"
@@ -314,7 +315,7 @@ export default function OrtegaAgentModal() {
             )}
           </div>
 
-          <div className="pt-3 border-t border-[#d6c4ae] flex items-center gap-2">
+          <div className="pt-3 border-t border-stone-300/80 flex items-center gap-2">
             <input
               type="text"
               value={input}
@@ -327,7 +328,7 @@ export default function OrtegaAgentModal() {
               }}
               placeholder="Escribe tu consulta o tesis filosófica para el TFM..."
               disabled={loading}
-              className="flex-1 bg-white border border-[#d6c4ae] rounded-xl px-4 py-2.5 text-sm text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-700/30 transition-all font-serif"
+              className="flex-1 bg-white border border-stone-300 rounded-xl px-4 py-2.5 text-sm text-stone-900 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-700/30 transition-all font-serif"
             />
 
             <button

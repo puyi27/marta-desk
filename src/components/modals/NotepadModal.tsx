@@ -167,8 +167,7 @@ export default function NotepadModal() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 flex items-center justify-center p-3 sm:p-6 backdrop-blur-md"
-      style={{ background: "rgba(10, 10, 12, 0.75)", zIndex: 60 }}
+      className="fixed inset-0 flex items-center justify-center p-3 sm:p-6 backdrop-blur-2xl bg-black/65 z-50 select-none"
       onClick={(e) => {
         if (e.target === e.currentTarget) setActiveModal(null);
       }}
@@ -177,6 +176,7 @@ export default function NotepadModal() {
         initial={{ scale: 0.95, opacity: 0, y: 15 }}
         animate={{ scale: 1, opacity: 1, y: 0 }}
         exit={{ scale: 0.95, opacity: 0, y: 15 }}
+        transition={{ type: "spring", stiffness: 300, damping: 28 }}
         className="relative w-full max-w-4xl bg-[#FAF6ED] rounded-3xl shadow-2xl border border-amber-900/20 overflow-hidden flex flex-col md:flex-row"
         style={{ height: "min(680px, 92vh)" }}
       >

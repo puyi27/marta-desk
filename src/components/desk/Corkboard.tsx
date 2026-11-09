@@ -1,114 +1,15 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import Image from "next/image";
-import {
-  DndContext,
-  useDraggable,
-  useSensor,
-  useSensors,
-  PointerSensor,
-  DragEndEvent,
-} from "@dnd-kit/core";
-import { corkboardPhotos, CorkboardPhoto } from "@/data/deskData";
 import { useDeskStore } from "@/store/useDeskStore";
 import { useAudioStore } from "@/store/useAudioStore";
 import DeskHotspot from "@/components/desk/DeskHotspot";
 
-interface DraggablePolaroidProps {
-  photo: CorkboardPhoto;
-  initialX: number;
-  initialY: number;
-  onOpen: (id: string) => void;
-}
-
-function DraggablePolaroid({
-  photo,
-  initialX,
-  initialY,
-  onOpen,
-}: DraggablePolaroidProps) {
-  const { attributes, listeners, setNodeRef, transform, isDragging } =
-    useDraggable({
-      id: photo.id,
-    });
-
-  const x = initialX + (transform?.x ?? 0);
-  const y = initialY + (transform?.y ?? 0);
-
-  return (
-    <div
-      ref={setNodeRef}
-      {...listeners}
-      {...attributes}
-      onClick={(e) => {
-        e.stopPropagation();
-        onOpen(photo.id);
-      }}
-      style={{
-        transform: `translate3d(${x}px, ${y}px, 0) rotate(${
-          isDragging ? 0 : photo.rotation
-        }deg) scale(${isDragging ? 1.08 : 1})`,
-        zIndex: isDragging ? 50 : 10,
-        touchAction: "none",
-      }}
-      className="absolute top-0 left-0 w-[46%] bg-white p-1 pb-3 rounded-xs shadow-md hover:shadow-xl transition-shadow cursor-grab active:cursor-grabbing select-none"
-    >
-      <div className="relative w-full aspect-square rounded-2xs overflow-hidden bg-neutral-100 pointer-events-none">
-        <Image
-          src={photo.imageSrc}
-          alt={photo.title}
-          fill
-          sizes="120px"
-          className="object-cover"
-        />
-      </div>
-      <p
-        className="text-center text-[8.5px] text-neutral-700 font-medium mt-1 truncate pointer-events-none px-0.5"
-        style={{ fontFamily: "var(--font-mono)" }}
-      >
-        {photo.title}
-      </p>
-    </div>
-  );
-}
-
 export default function Corkboard() {
   const { setActiveModal, setSelectedPhotoId } = useDeskStore();
   const { playBookOpen } = useAudioStore();
-  const [mounted, setMounted] = useState(false);
 
-  const [positions, setPositions] = useState<Record<string, { x: number; y: number }>>({
-    "photo-dora": { x: 8, y: 15 },
-    "photo-primos": { x: 95, y: 12 },
-    "photo-cristo": { x: 50, y: 130 },
-  });
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 5,
-      },
-    })
-  );
-
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, delta } = event;
-    const id = String(active.id);
-    setPositions((prev) => ({
-      ...prev,
-      [id]: {
-        x: (prev[id]?.x ?? 0) + delta.x,
-        y: (prev[id]?.y ?? 0) + delta.y,
-      },
-    }));
-  };
-
-  const handleOpenPhoto = (id: string) => {
+  const handleOpenPhoto = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
     playBookOpen();
     setSelectedPhotoId(id);
     setActiveModal("corkboard");
@@ -119,56 +20,33 @@ export default function Corkboard() {
       label="Corcho de Recuerdos"
       sublabel="3 fotos"
       badgePosition="top-right"
-      className="top-[4%] left-[2%] w-[20%] h-[50%]"
+      className="top-[2%] left-[1%] w-[21%] h-[52%]"
       style={{ zIndex: 15 }}
-      onClick={() => handleOpenPhoto(corkboardPhotos[0]?.id ?? "")}
+      onClick={(e) => handleOpenPhoto("photo-dora", e)}
     >
-      {mounted ? (
-        <DndContext id="corkboard-dnd" sensors={sensors} onDragEnd={handleDragEnd}>
-          <div className="relative w-full h-full p-2">
-            {corkboardPhotos.map((photo) => (
-              <DraggablePolaroid
-                key={photo.id}
-                photo={photo}
-                initialX={positions[photo.id]?.x ?? 0}
-                initialY={positions[photo.id]?.y ?? 0}
-                onOpen={handleOpenPhoto}
-              />
-            ))}
-          </div>
-        </DndContext>
-      ) : (
-        <div className="relative w-full h-full p-2">
-          {corkboardPhotos.map((photo) => {
-            const pos = positions[photo.id] ?? { x: 0, y: 0 };
-            return (
-              <div
-                key={photo.id}
-                style={{
-                  transform: `translate3d(${pos.x}px, ${pos.y}px, 0) rotate(${photo.rotation}deg)`,
-                }}
-                className="absolute top-0 left-0 w-[46%] bg-white p-1 pb-3 rounded-xs shadow-md select-none"
-              >
-                <div className="relative w-full aspect-square rounded-2xs overflow-hidden bg-neutral-100">
-                  <Image
-                    src={photo.imageSrc}
-                    alt={photo.title}
-                    fill
-                    sizes="120px"
-                    className="object-cover"
-                  />
-                </div>
-                <p
-                  className="text-center text-[8.5px] text-neutral-700 font-medium mt-1 truncate px-0.5"
-                  style={{ fontFamily: "var(--font-mono)" }}
-                >
-                  {photo.title}
-                </p>
-              </div>
-            );
-          })}
-        </div>
-      )}
+      <div
+        onClick={(e) => handleOpenPhoto("photo-dora", e)}
+        className="absolute top-[8%] left-[8%] w-[42%] h-[40%] cursor-pointer group/photo rounded-lg transition-transform hover:scale-105"
+        title="Dora (siempre con nosotros)"
+      >
+        <div className="absolute inset-0 rounded-lg ring-2 ring-white/0 group-hover/photo:ring-white/60 transition-all duration-300" />
+      </div>
+
+      <div
+        onClick={(e) => handleOpenPhoto("photo-primos", e)}
+        className="absolute top-[12%] right-[6%] w-[42%] h-[40%] cursor-pointer group/photo rounded-lg transition-transform hover:scale-105"
+        title="Los primos"
+      >
+        <div className="absolute inset-0 rounded-lg ring-2 ring-white/0 group-hover/photo:ring-white/60 transition-all duration-300" />
+      </div>
+
+      <div
+        onClick={(e) => handleOpenPhoto("photo-cristo", e)}
+        className="absolute bottom-[6%] left-[22%] w-[48%] h-[42%] cursor-pointer group/photo rounded-lg transition-transform hover:scale-105"
+        title="Nuestro Cristo"
+      >
+        <div className="absolute inset-0 rounded-lg ring-2 ring-white/0 group-hover/photo:ring-white/60 transition-all duration-300" />
+      </div>
     </DeskHotspot>
   );
 }

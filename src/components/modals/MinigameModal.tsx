@@ -161,8 +161,7 @@ export default function MinigameModal() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 flex items-center justify-center p-4 backdrop-blur-md"
-      style={{ background: "rgba(8, 10, 16, 0.8)", zIndex: 60 }}
+      className="fixed inset-0 flex items-center justify-center p-4 backdrop-blur-2xl bg-black/65 z-50 select-none"
       onClick={(e) => {
         if (e.target === e.currentTarget) setActiveModal(null);
       }}
@@ -171,6 +170,7 @@ export default function MinigameModal() {
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.9, opacity: 0 }}
+        transition={{ type: "spring", stiffness: 300, damping: 28 }}
         className="relative w-full max-w-lg bg-gradient-to-b from-neutral-900 via-neutral-900 to-black rounded-3xl p-6 md:p-8 shadow-2xl border border-white/10 overflow-hidden"
       >
         <button

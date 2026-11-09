@@ -15,10 +15,9 @@ export default function PhilosophyBook() {
 
   return (
     <DeskHotspot
-      label="TFM: Ortega y Gasset 📖"
-      sublabel="Estudios sobre el amor"
+      label="Asistente TFM · Ortega y Gasset 📖"
       badgePosition="top-right"
-      className="top-[55%] left-[58%] w-[24%] h-[20%]"
+      className="top-[54%] left-[58%] w-[25%] h-[22%]"
       style={{ zIndex: 13 }}
       onClick={handleClick}
     />

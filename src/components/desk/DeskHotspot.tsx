@@ -1,5 +1,6 @@
 "use client";
 
+import { motion } from "framer-motion";
 import { useAudioStore } from "@/store/useAudioStore";
 
 interface DeskHotspotProps {
@@ -18,6 +19,7 @@ interface DeskHotspotProps {
     | "bottom-center";
   onClick?: (e: React.MouseEvent) => void;
   children?: React.ReactNode;
+  pulseColor?: string;
 }
 
 const positionClasses = {
@@ -39,6 +41,7 @@ export default function DeskHotspot({
   badgePosition = "top-right",
   onClick,
   children,
+  pulseColor = "bg-amber-400",
 }: DeskHotspotProps) {
   const { playHoverTick } = useAudioStore();
 
@@ -47,23 +50,34 @@ export default function DeskHotspot({
       onClick={onClick}
       onMouseEnter={playHoverTick}
       style={style}
-      className={`absolute group cursor-pointer rounded-2xl transition-all duration-300 select-none ${className}`}
+      className={`absolute group cursor-pointer rounded-2xl select-none transition-all duration-300 ${className}`}
     >
-      <div className="absolute inset-0 rounded-2xl bg-[radial-gradient(circle,rgba(255,255,255,0.22)_0%,transparent_70%)] opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+      <div className="absolute inset-0 rounded-2xl bg-[radial-gradient(circle,rgba(255,240,200,0.28)_0%,transparent_70%)] opacity-0 group-hover:opacity-100 mix-blend-overlay transition-opacity duration-300 pointer-events-none" />
 
       {label && (
         <div
-          className={`absolute ${positionClasses[badgePosition]} pointer-events-none z-20 opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:scale-105`}
+          className={`absolute ${positionClasses[badgePosition]} pointer-events-none z-20`}
         >
-          <div className="backdrop-blur-md bg-white/90 text-zinc-900 px-3 py-1.5 rounded-full text-xs font-semibold shadow-xl border border-white/50 flex items-center gap-1.5 whitespace-nowrap">
-            {icon && <span className="text-zinc-700">{icon}</span>}
+          <motion.div
+            whileHover={{ y: -4, scale: 1.04 }}
+            className="backdrop-blur-xl bg-black/55 text-white/95 border border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.4)] rounded-full px-3.5 py-1.5 text-xs font-medium tracking-wide flex items-center gap-2 whitespace-nowrap opacity-90 group-hover:opacity-100 group-hover:border-white/40 transition-all"
+          >
+            <span className="relative flex h-2 w-2">
+              <span
+                className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${pulseColor}`}
+              />
+              <span
+                className={`relative inline-flex rounded-full h-2 w-2 ${pulseColor}`}
+              />
+            </span>
+            {icon && <span className="text-white/80">{icon}</span>}
             <span>{label}</span>
             {sublabel && (
-              <span className="text-[10px] text-zinc-500 font-normal">
-                {sublabel}
+              <span className="text-[10px] text-white/60 font-normal">
+                · {sublabel}
               </span>
             )}
-          </div>
+          </motion.div>
         </div>
       )}
 
@@ -71,4 +85,3 @@ export default function DeskHotspot({
     </div>
   );
 }
-
